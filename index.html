@@ -321,6 +321,29 @@ td.amt{width:27%}
   #budgetRows tr{grid-template-columns:18px 2fr 3fr 36px}
   .money input{font-size:14px}
 }
+
+/* lodging */
+.lodge{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin:14px 16px 6px;padding:14px 16px;border-radius:18px;border:2px dashed color-mix(in srgb,var(--c) 50%,var(--surface));background:color-mix(in srgb,var(--c) 7%,var(--surface))}
+.lodge.saved{border-style:solid}
+.lodge.editing{display:block}
+.lodge-h{font-family:var(--font-display);font-size:19px}
+.lodge .hint{margin-top:2px}
+.lodge-btns{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.lodge-steps{margin:8px 0 12px;padding-left:20px;font-size:14px;color:var(--muted)}
+.lodge-steps li{margin:4px 0}
+.lf-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lf{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--muted)}
+.lf.wide{grid-column:1/-1}
+.lf input{padding:9px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);font-size:15px;font-weight:400;color:var(--ink)}
+.lf input:focus{border-color:var(--accent);outline:none}
+.lodge-btns .btn.primary,.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.lodge.editing .lodge-btns{margin-top:12px}
+#lodgeSum{margin-top:14px;padding:12px 14px;border-radius:14px;background:var(--gold-soft);font-size:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.mini{text-decoration:none;font-size:13px;margin-left:4px;padding:1px 6px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+.mini:hover{border-color:var(--accent)}
+.acts li{grid-template-columns:76px 1fr}
+.slot{font-variant-numeric:tabular-nums}
+@media (max-width:760px){.lf-grid{grid-template-columns:1fr}.lodge{margin:12px 10px 4px}.acts li{grid-template-columns:auto 1fr}}
 </style>
 </head>
 <body>
@@ -360,7 +383,7 @@ td.amt{width:27%}
     <div class="section-head">
       <h2>일자별 일정</h2>
       <div class="legend"><span class="chip move">이동하는 날</span><span class="chip book">미리 예약할 곳</span><span class="sp"></span><button class="btn sm" id="openAll" type="button">모두 펼치기</button><button class="btn sm" id="closeAll" type="button">모두 접기</button></div>
-      <p class="hint">날짜를 누르면 그날 일정을 접거나 펼 수 있어요.</p>
+      <p class="hint">날짜를 누르면 그날 일정을 접거나 펼 수 있어요. 📍를 누르면 구글 지도가 열리고, 도시마다 🏨 숙소를 저장할 수 있어요.</p>
     </div>
     <div class="days" id="days"></div>
   </section>
@@ -409,6 +432,7 @@ td.amt{width:27%}
           <tbody id="budgetRows"></tbody>
         </table>
         <div class="bar" id="bar" aria-hidden="true"></div>
+        <div id="lodgeSum"></div>
         <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
           <button class="btn" id="addRow" type="button">+ 항목 추가</button>
           <button class="btn" id="resetBudget" type="button">예시값으로 되돌리기</button>
@@ -439,19 +463,111 @@ const CITIES = {
 const ORDER = ["bcn","mad","grx","svq","opo"];
 
 const DAYS = [
-  {c:"bcn", t:"인천 → 바르셀로나 도착", move:"인천 → 바르셀로나 (보통 1회 경유)", items:["공항에서 Aerobús 또는 R2 Nord 열차로 시내 이동","숙소 체크인 후 고딕 지구·바르셀로나 대성당 가볍게 산책","첫 저녁은 타파스로 가볍게, 시차 적응 우선"]},
-  {c:"bcn", t:"가우디 데이", book:"사그라다 파밀리아", items:["오전: 사그라다 파밀리아 (시간 지정 입장, 이른 시간이 한산)","산 파우 병원 외관 산책 (사그라다에서 도보 약 10분)","오후: 그라시아 거리, 카사 바트요·카사 밀라","저녁: 엘 보른 지구 바·레스토랑"]},
-  {c:"bcn", t:"공원과 바다", book:"구엘 공원", items:["오전: 구엘 공원 (기념 구역은 시간 지정 예약)","점심: 라 보케리아 시장","오후: 바르셀로네타 해변 산책, 해산물 빠에야","일몰: 벙커 델 카르멜 또는 몬주익 언덕"]},
-  {c:"mad", t:"바르셀로나 → 마드리드", move:"고속열차 약 2시간 30분~3시간", items:["Sants역 출발 고속열차 (AVE·iryo·Ouigo 중 저렴한 것)","오후: 솔 광장 → 마요르 광장 → 산 미겔 시장","저녁: 산 히네스에서 추로스 콘 초콜라테"]},
-  {c:"mad", t:"미술관과 왕궁", book:"프라도 미술관", items:["오전: 프라도 미술관 (벨라스케스 '시녀들', 고야)","레티로 공원, 크리스털 궁전","오후: 레이나 소피아 미술관 (피카소 '게르니카') 또는 왕궁","일몰: 데보드 신전"]},
-  {c:"mad", t:"톨레도 당일치기", move:"Avant 열차 약 33분 (왕복)", items:["아토차역 → 톨레도, 역에서 구시가지까지 버스나 도보","톨레도 대성당, 산토 토메 성당 (엘 그레코)","미라도르 델 바예에서 도시 전경","저녁 마드리드 복귀"]},
-  {c:"grx", t:"마드리드 → 그라나다", move:"고속열차 약 3시간 20분", items:["오전 열차로 이동, 점심 무렵 도착","오후: 알바이신 골목 산책, 칼데레리아 거리 찻집","일몰: 산 니콜라스 전망대에서 알함브라 바라보기","저녁: 음료 주문 시 나오는 무료 타파스 투어"]},
-  {c:"grx", t:"알함브라", book:"알함브라 나스르 궁전", items:["오전: 알함브라 (나스르 궁전은 지정 30분 안에 입장, 여권 지참)","헤네랄리페 정원, 알카사바, 카를로스 5세 궁전","오후: 그라나다 대성당·왕실 예배당","밤: 사크로몬테 동굴 플라멩코"]},
-  {c:"svq", t:"그라나다 → 세비야", move:"버스(ALSA)·기차 약 2시간 30분~3시간", items:["오전 이동, 숙소 체크인","오후: 세비야 대성당과 히랄다 탑","산타 크루스 지구 골목 산책","저녁: 엘 린콘시요 등 노포 타파스 바"]},
-  {c:"svq", t:"세비야 하이라이트", book:"알카사르", items:["오전: 레알 알카사르 (시간 지정 예약)","스페인 광장, 마리아 루이사 공원","해 질 녘: 메트로폴 파라솔 전망대","밤: 플라멩코 공연 (타블라오 또는 박물관 공연)"]},
-  {c:"opo", t:"세비야 → 포르투", move:"라이언에어 직항 약 1시간 15분 · 시계 1시간 뒤로", items:["직항은 운항 요일이 정해져 있어요. 없는 날은 리스본 경유 버스·기차","공항에서 메트로 E선으로 시내 이동","오후: 상 벤투역 아줄레주, 포르투 대성당","일몰: 동 루이스 1세 다리 위층, 모루 정원"]},
-  {c:"opo", t:"포르투 즐기기", book:"렐루 서점", items:["오전: 렐루 서점 (입장권 필요, 오픈 직후 추천), 클레리구스 탑","점심: 프란세지냐","오후: 도루강 6개 다리 크루즈 → 빌라 노바 드 가이아 와이너리 시음","저녁: 히베이라 강변 저녁 식사"]},
-  {c:"opo", t:"포르투 → 인천", move:"포르투 → 인천 (경유)", items:["오전: 볼량 시장에서 기념품, 마제스틱 카페","공항은 출발 3시간 전 도착 목표","EES 출국 심사 대기 시간 고려"]}
+  {c:"bcn", t:"인천 → 바르셀로나 도착", move:"인천 → 바르셀로나 (보통 1회 경유)", items:[
+    ["15:00","엘 프라트 공항 도착 → 아에로부스로 카탈루냐 광장까지 약 35분","Aerobús Plaça de Catalunya"],
+    ["17:00","숙소 체크인, 짐 정리하고 잠깐 휴식"],
+    ["18:00","람블라스 거리 → 레이알 광장 산책 (소매치기 주의 구역)","Plaça Reial Barcelona"],
+    ["19:00","바르셀로나 대성당과 고딕 지구 골목 구경","Catedral de Barcelona"],
+    ["20:30","저녁: 엘 샴파넷에서 카바 한 잔과 안초비 타파스","El Xampanyet Barcelona"],
+    ["22:00","숙소 복귀, 시차 적응을 위해 일찍 취침"]]},
+  {c:"bcn", t:"가우디 데이", book:"사그라다 파밀리아 · 카사 바트요", items:[
+    ["08:30","아침: 호프만 제과점 마스카르포네 크루아상","Pastelería Hofmann Barcelona"],
+    ["09:00","사그라다 파밀리아 (예약 시간 입장, 오디오가이드 포함 1.5~2시간)","Sagrada Familia Barcelona"],
+    ["11:30","산 파우 병원 외관 산책 (도보 약 10분)","Recinte Modernista de Sant Pau"],
+    ["13:30","점심: 세르베세리아 카탈라나 (오픈 직후 가야 대기가 짧아요)","Cervecería Catalana Barcelona"],
+    ["15:30","카사 바트요 내부 관람 (시간 지정 예약)","Casa Batlló Barcelona"],
+    ["17:00","카사 밀라 외관 보고 그라시아 거리 쇼핑","Casa Milà Barcelona"],
+    ["19:00","숙소에서 휴식"],
+    ["21:00","저녁: 파코 메랄고 타파스 (예약 권장)","Paco Meralgo Barcelona"]]},
+  {c:"bcn", t:"공원과 바다", book:"구엘 공원", items:[
+    ["09:30","구엘 공원 기념 구역 (예약, 약 1.5시간 · 올라가는 길이 오르막)","Park Güell Barcelona"],
+    ["12:00","라 보케리아 시장 구경, 생과일주스와 하몽 간식","Mercat de la Boqueria Barcelona"],
+    ["13:30","점심: 바르셀로네타 칸 라모네트 해산물 빠에야 (빠에야는 점심에 먹어요)","Can Ramonet Barcelona"],
+    ["15:30","바르셀로네타 해변 산책"],
+    ["16:30","엘 보른 지구, 피카소 미술관 (선택)","Museu Picasso Barcelona"],
+    ["일몰 전","벙커 델 카르멜에서 바르셀로나 전경과 노을 (버스로 이동)","Bunkers del Carmel Barcelona"],
+    ["21:00","저녁: 바르 카녜테 (라발 지구 인기 타파스 바, 예약 권장)","Bar Cañete Barcelona"]]},
+  {c:"mad", t:"바르셀로나 → 마드리드", move:"고속열차 약 2시간 30분~3시간", items:[
+    ["08:00","체크아웃, 산츠역으로 이동 (출발 30분 전 도착, 짐 검색 있어요)","Barcelona Sants"],
+    ["09:00","고속열차 출발 (AVE·iryo·Ouigo)"],
+    ["12:00","마드리드 아토차역 도착 → 숙소에 짐 맡기기","Madrid Atocha"],
+    ["13:30","점심: 1827년 개업한 카사 알베르토 소꼬리찜 (문학의 거리)","Casa Alberto Madrid"],
+    ["15:30","솔 광장 → 마요르 광장 산책","Plaza Mayor Madrid"],
+    ["17:00","산 미겔 시장에서 간식","Mercado de San Miguel Madrid"],
+    ["18:00","왕궁 외관과 알무데나 대성당 → 데보드 신전 일몰","Templo de Debod Madrid"],
+    ["21:00","저녁: 라 카사 델 아부엘로 감바스 알 아히요","La Casa del Abuelo Madrid"],
+    ["23:00","산 히네스에서 추로스 콘 초콜라테 (밤늦게까지 영업)","Chocolatería San Ginés Madrid"]]},
+  {c:"mad", t:"미술관과 공원", book:"프라도 미술관", items:[
+    ["10:00","프라도 미술관 (2.5~3시간 · 벨라스케스 '시녀들', 고야)","Museo del Prado Madrid"],
+    ["14:00","점심: 1895년부터 이어온 말라카틴의 코시도 마드릴레뇨 (예약 권장)","Malacatín Madrid"],
+    ["16:00","레티로 공원, 크리스털 궁전, 호수 보트","Palacio de Cristal Retiro"],
+    ["18:00","레이나 소피아 미술관 피카소 '게르니카' (휴관일 확인)","Museo Reina Sofía Madrid"],
+    ["20:30","저녁: 엘 브리얀테 오징어튀김 샌드위치 (레이나 소피아 바로 옆)","El Brillante Madrid"]]},
+  {c:"mad", t:"톨레도 당일치기", move:"Avant 열차 약 33분 (왕복)", items:[
+    ["08:30","아토차역에서 톨레도행 열차 (좌석 예약 필수)","Madrid Atocha"],
+    ["09:30","톨레도역 → 시내버스나 택시로 소코도베르 광장","Plaza de Zocodover Toledo"],
+    ["10:00","톨레도 대성당 (약 1.5시간)","Catedral de Toledo"],
+    ["12:00","산토 토메 성당, 엘 그레코 '오르가스 백작의 매장'","Iglesia de Santo Tomé Toledo"],
+    ["13:30","점심: 톨레도 전통 요리 카르카무사(돼지고기 토마토 스튜)","carcamusas Toledo"],
+    ["15:00","유대인 지구, 산 마르틴 다리","Puente de San Martín Toledo"],
+    ["17:00","미라도르 델 바예에서 톨레도 전경 (택시 또는 관광열차)","Mirador del Valle Toledo"],
+    ["19:00","열차로 마드리드 복귀"],
+    ["21:00","저녁: 카사 루시오 우에보스 로토스 (예약 권장)","Casa Lucio Madrid"]]},
+  {c:"grx", t:"마드리드 → 그라나다", move:"고속열차 약 3시간 20분", items:[
+    ["08:30","아토차역에서 그라나다행 고속열차","Madrid Atocha"],
+    ["12:00","그라나다 도착 → 숙소 체크인","Estación de Granada"],
+    ["13:30","점심: 바르 로스 디아만테스 해산물 타파스","Bar Los Diamantes Granada"],
+    ["15:00","그라나다 대성당과 왕실 예배당","Catedral de Granada"],
+    ["17:00","알바이신 골목 → 칼데레리아 거리 찻집에서 민트차","Calle Calderería Nueva Granada"],
+    ["일몰 전","산 니콜라스 전망대에서 알함브라 노을","Mirador de San Nicolás Granada"],
+    ["21:00","저녁: 보데가스 카스타녜다 → 바르 포에, 음료마다 무료 타파스","Bodegas Castañeda Granada"]]},
+  {c:"grx", t:"알함브라", book:"알함브라 나스르 궁전", items:[
+    ["08:30","알함브라 입장 (여권 필수) · 헤네랄리페 정원부터","Alhambra Granada"],
+    ["10:00","나스르 궁전 (예약 시간 30분 안에 입장)","Palacios Nazaríes Alhambra"],
+    ["12:00","알카사바 요새, 카를로스 5세 궁전","Alcazaba Alhambra"],
+    ["14:00","점심: 바르 아빌라 하몽 아사도 (일요일 휴무)","Bar Ávila Granada"],
+    ["16:00","숙소에서 시에스타"],
+    ["18:00","카페 푸트볼에서 추로스","Café Fútbol Granada"],
+    ["21:00","사크로몬테 동굴 플라멩코 (예약)","flamenco Sacromonte Granada"],
+    ["23:00","나바스 거리 타파스로 마무리","Calle Navas Granada"]]},
+  {c:"svq", t:"그라나다 → 세비야", move:"버스(ALSA)·기차 약 2시간 30분~3시간", items:[
+    ["09:00","ALSA 버스 또는 열차로 세비야 이동","Estación de Autobuses Granada"],
+    ["12:30","세비야 도착 → 숙소 체크인"],
+    ["13:30","점심: 엘 파사헤 타파스 이베리코 요리 (대성당 근처)","Restaurante El Pasaje Tapas Sevilla"],
+    ["15:00","세비야 대성당과 히랄다 탑 (예약 권장)","Catedral de Sevilla"],
+    ["17:30","산타 크루스 지구 골목, 무리요 정원","Barrio Santa Cruz Sevilla"],
+    ["19:30","라스 테레사스에서 하몽과 셰리 한 잔","Las Teresas Sevilla"],
+    ["21:00","저녁: 1670년 개업한 엘 린콘시요","El Rinconcillo Sevilla"]]},
+  {c:"svq", t:"세비야 하이라이트", book:"알카사르 · 플라멩코", items:[
+    ["09:30","레알 알카사르 (첫 타임 예약 추천, 약 2시간)","Real Alcázar de Sevilla"],
+    ["12:00","스페인 광장, 마리아 루이사 공원","Plaza de España Sevilla"],
+    ["14:00","점심: 바르 에슬라바 보레투스 케이크 (인기 많아 대기 있어요)","Bar Eslava Sevilla"],
+    ["16:00","숙소에서 휴식 (한낮 더위 피하기)"],
+    ["17:30","트리아나 다리 건너 트리아나 시장과 도자기 거리","Mercado de Triana Sevilla"],
+    ["19:30","메트로폴 파라솔 전망대 일몰","Setas de Sevilla"],
+    ["21:00","플라멩코 공연 (플라멩코 박물관 또는 타블라오)","Museo del Baile Flamenco Sevilla"],
+    ["22:30","저녁: 라 브루닐다 (예약 없이 줄 서는 곳)","La Brunilda Sevilla"]]},
+  {c:"opo", t:"세비야 → 포르투", move:"라이언에어 직항 약 1시간 15분 · 시계 1시간 뒤로", items:[
+    ["09:00","공항버스 EA로 세비야 공항 (약 35분)","Aeropuerto de Sevilla"],
+    ["11:00","포르투행 비행 (운항 요일·시간 확인, 위탁수하물 별도)"],
+    ["12:30","포르투 공항 → 메트로 E선으로 시내 (약 35분)","Trindade Porto"],
+    ["13:30","점심: 1959년부터 영업한 카페 산티아고의 프란세지냐","Café Santiago Porto"],
+    ["15:00","상 벤투역 아줄레주 → 포르투 대성당","Estação de São Bento Porto"],
+    ["17:00","동 루이스 1세 다리 위층 건너기 → 모루 정원 노을","Jardim do Morro Porto"],
+    ["20:30","저녁: 히베이라 아데가 상 니콜라우 바칼라우","Adega São Nicolau Porto"]]},
+  {c:"opo", t:"포르투 즐기기", book:"렐루 서점 · 와이너리", items:[
+    ["09:00","렐루 서점 (오픈 직후, 온라인 티켓)","Livraria Lello Porto"],
+    ["10:00","클레리구스 탑 전망","Torre dos Clérigos Porto"],
+    ["11:00","볼량 시장 구경, 콘페이타리아 두 볼량 디저트","Mercado do Bolhão Porto"],
+    ["12:30","점심: 콩가 비파나(돼지고기 샌드위치)","Conga Porto"],
+    ["14:00","히베이라에서 6개 다리 크루즈 (약 50분)","Six Bridges Cruise Ribeira Porto"],
+    ["16:00","빌라 노바 드 가이아 와이너리 투어·시음 (그라함스·샌더먼 예약)","Graham's Port Lodge"],
+    ["19:00","가이아 강변에서 노을"],
+    ["21:00","저녁: 유코 타번 프란세지냐 또는 세르베자리아 브라장","Yuko Tavern Porto"]]},
+  {c:"opo", t:"포르투 → 인천", move:"포르투 → 인천 (경유)", items:[
+    ["09:00","만테이가리아 나타와 커피","Manteigaria Porto"],
+    ["10:00","마제스틱 카페 구경, 기념품 쇼핑","Majestic Café Porto"],
+    ["출발 3h 전","메트로 E선으로 공항 (약 35분) · EES 출국 심사 대기 고려","Aeroporto do Porto"]]}
 ];
 
 const CITY_INFO = {
@@ -529,6 +645,53 @@ const CITY_INFO = {
     ],
     tip:"언덕과 돌길이 많아요. 굽 없는 신발이 좋아요."}
 };
+
+const FOOD_EXTRA = {
+  bcn:[
+    ["세르베세리아 카탈라나","한국인에게 특히 유명한 타파스 집. 꿀대구, 꼬치 타파스. 오픈 직후 방문 추천.","","Cervecería Catalana Barcelona"],
+    ["엘 샴파넷","엘 보른의 오래된 카바 바. 안초비, 하몽 타파스와 카바 한 잔.","","El Xampanyet Barcelona"],
+    ["칸 라모네트","60년 넘게 바르셀로네타에서 빠에야를 만들어 온 가족 식당.","","Can Ramonet Barcelona"],
+    ["카 레스테벳","1940년 개업. 1인분도 되는 해산물 빠에야와 오렌지 소스 오리구이.","","Ca l'Estevet Barcelona"],
+    ["바르 카녜테","라발 지구의 활기찬 카운터 타파스 바. 예약 권장.","","Bar Cañete Barcelona"],
+    ["파코 메랄고","현지인 단골 타파스 바. 파타타스 브라바스, 해산물 크로케타.","","Paco Meralgo Barcelona"],
+    ["바르 보카타","2026년 레솔 가이드 '솔레테'에 선정된 토르티야·보카디요 바.","","Bar Bocata Barcelona"],
+    ["호프만 제과점","마스카르포네 크루아상으로 유명한 디저트 가게.","","Pastelería Hofmann Barcelona"]],
+  mad:[
+    ["카사 알베르토","1827년 개업. 소꼬리찜(라보 데 토로)과 바칼라오가 대표 메뉴.","","Casa Alberto Madrid"],
+    ["라 카사 델 아부엘로","지글지글 끓는 감바스 알 아히요의 원조격 바.","","La Casa del Abuelo Madrid"],
+    ["말라카틴","1895년부터 이어온 코시도 마드릴레뇨(병아리콩 고기 스튜) 명가.","","Malacatín Madrid"],
+    ["타베르나 라 다니엘라","코시도를 수프·채소·고기 3단계로 내주는 타일 인테리어 식당.","","Taberna La Daniela Madrid"],
+    ["카사 루시오","감자튀김 위에 반숙 계란을 깨뜨린 우에보스 로토스로 유명. 예약 권장.","","Casa Lucio Madrid"],
+    ["엘 브리얀테","레이나 소피아 옆 오징어튀김 샌드위치 노포.","","El Brillante Madrid"],
+    ["라 돌로레스","1908년부터 이어온 타일 벽 맥주 바.","","La Dolores Madrid"]],
+  grx:[
+    ["바르 아빌라","하몽 아사도(구운 돼지고기)가 시그니처. 늘 붐비고 일요일 휴무.","","Bar Ávila Granada"],
+    ["바르 로스 디아만테스","해산물 튀김 타파스 전문. 시내에 지점이 여러 곳.","","Bar Los Diamantes Granada"],
+    ["바르 포에","다른 바와 다르게 이국적인 타파스를 내는 인기 바.","","Bar Poë Granada"],
+    ["나바스 거리","대성당에서 도보 5분, 밤마다 붐비는 타파스 거리.","","Calle Navas Granada"],
+    ["카페 푸트볼","그라나다에서 오래된 추로스·초콜라테 카페.","","Café Fútbol Granada"]],
+  svq:[
+    ["바르 에슬라바","보레투스 케이크 등 창작 타파스로 상을 받은 인기 바.","","Bar Eslava Sevilla"],
+    ["라 브루닐다","현대적인 타파스로 현지인·여행자 모두에게 인기.","","La Brunilda Sevilla"],
+    ["오베하스 네그라스","대성당 근처 캐주얼 모던 타파스.","","Ovejas Negras Sevilla"],
+    ["카사 모랄레스","대성당 맞은편, 옛 술통이 늘어선 작은 노포 바.","","Casa Morales Sevilla"],
+    ["라스 테레사스","산타 크루스 골목의 하몽이 주렁주렁 걸린 전통 바.","","Las Teresas Sevilla"],
+    ["엘 파사헤 타파스","대성당 근처 이베리코 요리 맛집.","","Restaurante El Pasaje Tapas Sevilla"],
+    ["라 아소테아","창의적이고 정갈한 타파스. 지점 여러 곳.","","La Azotea Sevilla"]],
+  opo:[
+    ["카페 산티아고","1959년부터 영업. 비밀 소스 프란세지냐로 유명.","","Café Santiago Porto"],
+    ["유코 타번","현지 투표에서 프란세지냐 1위로 뽑힌 아늑한 식당. 주말엔 붐벼요.","","Yuko Tavern Porto"],
+    ["세르베자리아 브라장","프란세지냐와 칼두 베르드(양배추 수프) 맛집.","","Cervejaria Brasão Porto"],
+    ["아데가 상 니콜라우","히베이라 강변의 바칼라우(대구) 요리 식당.","","Adega São Nicolau Porto"],
+    ["타베르나 두스 메르카도레스","포르투 전통 내장 스튜 트리파스로 유명. 좌석이 적어요.","","Taberna dos Mercadores Porto"],
+    ["만테이가리아","갓 구운 파스텔 드 나타. 하루 종일 구워내요.","","Manteigaria Porto"],
+    ["콩가","포르투식 매콤한 비파나(돼지고기 샌드위치) 노포.","","Conga Porto"],
+    ["타베르나 폴리아스 드 바쿠","도루 내추럴 와인과 샤퀴테리. 좌석이 적어 예약 권장.","","Taberna Folias de Baco Porto"]]
+};
+for (const k in FOOD_EXTRA){
+  const have = new Set(CITY_INFO[k].food.map(f=>f[0]));
+  FOOD_EXTRA[k].forEach(f=>{ if(!have.has(f[0])) CITY_INFO[k].food.push(f); });
+}
 
 const LEGS = [
   {from:"인천", to:"바르셀로나", how:"직항은 시즌별 운항 여부 확인, 보통 1회 경유. 인(IN) 바르셀로나 · 아웃(OUT) 포르투 다구간으로 검색", dur:"15~20시간"},
@@ -643,7 +806,7 @@ function renderDays(){
     const first = list[0][1]+1, last = list[list.length-1][1]+1;
     const cards = list.map(([d,i])=>{
       const isLast = i === DAYS.length-1;
-      const stay = isLast ? "기내 1박 후 귀국" : `${c.name}에서 숙박`;
+      const stay = isLast ? "기내 1박 후 귀국" : ((lodges[k]||{}).name ? `${esc(lodges[k].name)}에서 숙박` : `${c.name}에서 숙박 (숙소 미정)`);
       return `<details class="day" data-i="${i}" ${openDays.has(i)?"open":""}>
         <summary>
           <span class="when"><span class="dpill">DAY</span><span class="dnum num">${i+1}</span><span class="ddate num">${dayDate(i)}</span></span>
@@ -652,14 +815,14 @@ function renderDays(){
           <span class="chev" aria-hidden="true"></span>
         </summary>
         <div class="body">
-          <ul class="acts">${d.items.map(x=>{ const [sl,tx]=splitSlot(x); return `<li><span class="slot${sl?"":" empty"}">${esc(sl||"·")}</span><span>${esc(tx)}</span></li>`; }).join("")}</ul>
+          <ul class="acts">${d.items.map(([tm,tx,q])=>`<li><span class="slot">${esc(tm)}</span><span>${esc(tx)}${q? `<a class="mini" href="${gmap(q)}" target="_blank" rel="noopener" aria-label="구글 지도에서 보기">📍</a>`:""}</span></li>`).join("")}</ul>
           <div class="stay">${stay}</div>
         </div></details>`;
     }).join("");
     return `<section class="cgroup" style="--c:var(${c.color})" aria-label="${c.name}">
       <div class="chead"><span class="cnum" aria-hidden="true">${EMO[k]}</span><div><h3>${c.name}</h3><p>${c.country} · ${c.nights}박 · DAY ${first}${last>first? "–"+last:""}</p></div>
       <a class="go" href="#cities" data-city="${k}">명소·맛집 보기</a></div>
-      <div class="tl">${cards}</div></section>`;
+      <div class="tl">${lodgeHTML(k)}${cards}</div></section>`;
   }).join("");
 }
 const daysEl = document.getElementById("days");
@@ -685,8 +848,8 @@ function renderCityPick(){
 const gmap = q => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
 function renderCity(){
   const c = CITIES[curCity], info = CITY_INFO[curCity];
-  const list = arr => `<div class="items">${arr.map(([n,d,p],i)=>{
-    const q = MAPQ[n] || (n + " " + c.name);
+  const list = arr => `<div class="items">${arr.map(([n,d,p,q4],i)=>{
+    const q = q4 || MAPQ[n] || (n + " " + c.name);
     return `<div class="item"><span class="k">${i+1}</span><div><b>${esc(n)}</b><span>${esc(d)}</span><div class="item-foot">${p? `<span class="price num">${esc(p)}</span>`:""}<a class="maplink" href="${gmap(q)}" target="_blank" rel="noopener">📍 구글 지도에서 보기</a></div></div></div>`;
   }).join("")}</div>`;
   document.getElementById("cityBox").innerHTML = `<div class="city" style="--c:var(${c.color})">
@@ -765,6 +928,7 @@ function renderBudget(){
   renderTotals();
 }
 function renderTotals(){
+  renderLodgeSum();
   const total = budget.reduce((a,r)=>a+(+r[1]||0),0);
   const rate = +rateEl.value || 0;
   document.getElementById("totalEur").textContent = "€" + Math.round(total).toLocaleString("ko-KR");
@@ -808,6 +972,93 @@ function renderChecks(){
 document.getElementById("checks").addEventListener("change", e=>{
   if(e.target.type!=="checkbox") return;
   done[e.target.id] = e.target.checked; save("ib-checks", done); renderChecks();
+});
+
+/* ---------- lodging ---------- */
+const LODGE_AREA = {
+  bcn:["에이샴플레 · 고딕 지구","hotels Eixample Barcelona"],
+  mad:["솔 광장 · 문학의 거리","hotels near Puerta del Sol Madrid"],
+  grx:["누에바 광장 · 대성당 주변","hotels near Plaza Nueva Granada"],
+  svq:["산타 크루스 · 대성당 주변","hotels Barrio Santa Cruz Sevilla"],
+  opo:["히베이라 · 바이샤","hotels Ribeira Porto"]
+};
+let lodges = load("ib-lodge", {});
+let editingLodge = null;
+function cityFirstDay(k){ return DAYS.findIndex(d=>d.c===k); }
+function nameFromMapUrl(u){
+  try{
+    const s = decodeURIComponent(u);
+    let m = s.match(/\/maps\/place\/([^/@?]+)/); if(m) return m[1].replace(/\+/g," ").trim();
+    m = s.match(/[?&]q(?:uery)?=([^&]+)/); if(m) return m[1].replace(/\+/g," ").trim();
+  }catch(e){}
+  return "";
+}
+function lodgeDates(k){
+  if(!startEl.value) return `${CITIES[k].nights}박`;
+  const i = cityFirstDay(k);
+  return `체크인 ${dayDate(i)} → 체크아웃 ${dayDate(i+CITIES[k].nights)} · ${CITIES[k].nights}박`;
+}
+function lodgeHTML(k){
+  const L = lodges[k] || {}, c = CITIES[k], [area, q] = LODGE_AREA[k];
+  const find = `<a class="maplink" href="${gmap(q)}" target="_blank" rel="noopener">🔎 구글 지도에서 숙소 찾기</a>`;
+  if(editingLodge === k){
+    return `<div class="lodge editing">
+      <div class="lodge-h">🏨 ${c.name} 숙소 ${L.name? "수정":"추가"}</div>
+      <ol class="lodge-steps"><li>${find} 를 눌러 숙소를 고르세요.</li><li>구글 지도에서 <b>공유 → 링크 복사</b> 후 아래 칸에 붙여넣으면 이름이 자동으로 채워져요.</li></ol>
+      <div class="lf-grid">
+        <label class="lf wide"><span>구글 지도 링크</span><input id="lf-url" value="${esc(L.url||"")}" placeholder="https://www.google.com/maps/place/..." inputmode="url"></label>
+        <label class="lf wide"><span>숙소 이름</span><input id="lf-name" value="${esc(L.name||"")}" placeholder="예: Hotel Catalonia Born"></label>
+        <label class="lf"><span>1박 요금 (1인 기준, €)</span><input id="lf-price" type="number" min="0" step="any" value="${L.price??""}"></label>
+        <label class="lf"><span>예약번호 · 메모</span><input id="lf-memo" value="${esc(L.memo||"")}" placeholder="예약번호, 체크인 시간 등"></label>
+      </div>
+      <p class="hint" id="lf-msg" style="margin:6px 0 0"></p>
+      <div class="lodge-btns"><button class="btn primary sm" type="button" data-lodge="save" data-k="${k}">저장</button><button class="btn sm" type="button" data-lodge="cancel">취소</button></div>
+    </div>`;
+  }
+  if(!L.name){
+    return `<div class="lodge empty"><div><div class="lodge-h">🏨 아직 숙소가 없어요</div><div class="hint">추천 지역: ${area} · ${lodgeDates(k)}</div></div>
+      <div class="lodge-btns">${find}<button class="btn primary sm" type="button" data-lodge="edit" data-k="${k}">+ 숙소 추가</button></div></div>`;
+  }
+  const href = /^https?:\/\//.test(L.url||"") ? L.url : gmap(L.name + " " + c.name);
+  const price = +L.price ? ` · 1박 €${(+L.price).toLocaleString("ko-KR")} (₩${Math.round(+L.price*(+rateEl.value||0)).toLocaleString("ko-KR")})` : "";
+  return `<div class="lodge saved"><div><div class="lodge-h">🏨 ${esc(L.name)}</div><div class="hint">${lodgeDates(k)}${price}</div>${L.memo? `<div class="hint">📝 ${esc(L.memo)}</div>`:""}</div>
+    <div class="lodge-btns"><a class="maplink" href="${href}" target="_blank" rel="noopener">📍 지도</a><button class="btn sm" type="button" data-lodge="edit" data-k="${k}">수정</button><button class="btn sm" type="button" data-lodge="del" data-k="${k}">삭제</button></div></div>`;
+}
+function lodgeTotal(){ return ORDER.reduce((a,k)=>a + (+(lodges[k]||{}).price||0)*CITIES[k].nights, 0); }
+function renderLodgeSum(){
+  const el = document.getElementById("lodgeSum"); if(!el) return;
+  const t = lodgeTotal(), n = ORDER.filter(k=>(lodges[k]||{}).name).length;
+  el.innerHTML = n ? `🏨 저장한 숙소 ${n}곳 요금 합계 <b class="num">€${Math.round(t).toLocaleString("ko-KR")}</b> <button class="btn sm" type="button" id="applyLodge">숙소 예산에 반영</button>` : `🏨 일정 탭에서 숙소를 저장하면 여기서 숙소 예산에 바로 반영할 수 있어요.`;
+}
+daysEl.addEventListener("input", e=>{
+  if(e.target.id !== "lf-url") return;
+  const nm = nameFromMapUrl(e.target.value.trim()), nameEl = document.getElementById("lf-name"), msg = document.getElementById("lf-msg");
+  if(nm){ nameEl.value = nm; msg.textContent = "✅ 링크에서 숙소 이름을 가져왔어요."; }
+  else if(/goo\.gl|maps\.app/.test(e.target.value)){ msg.textContent = "짧은 공유 링크는 이름을 읽을 수 없어요. 숙소 이름만 직접 적어주세요. 링크는 그대로 저장돼요."; }
+  else msg.textContent = "";
+});
+daysEl.addEventListener("click", e=>{
+  const b = e.target.closest("[data-lodge]"); if(!b) return;
+  e.preventDefault();
+  const act = b.dataset.lodge, k = b.dataset.k;
+  if(act==="edit"){ editingLodge = k; }
+  else if(act==="cancel"){ editingLodge = null; }
+  else if(act==="del"){ delete lodges[k]; save("ib-lodge", lodges); }
+  else if(act==="save"){
+    const name = document.getElementById("lf-name").value.trim();
+    if(!name){ document.getElementById("lf-msg").textContent = "숙소 이름을 입력해주세요."; return; }
+    lodges[k] = { name, url: document.getElementById("lf-url").value.trim(), price: document.getElementById("lf-price").value, memo: document.getElementById("lf-memo").value.trim() };
+    save("ib-lodge", lodges); editingLodge = null;
+  }
+  renderDays(); renderLodgeSum();
+  if(act==="edit"){ const u = document.getElementById("lf-url"); u && u.focus(); }
+});
+document.addEventListener("click", e=>{
+  if(e.target.id !== "applyLodge") return;
+  const t = Math.round(lodgeTotal());
+  let i = budget.findIndex(r=>String(r[0]).includes("숙소"));
+  if(i<0){ budget.push(["숙소 (저장한 숙소 합계)", t]); } else { budget[i][1] = t; }
+  save("ib-budget", budget); renderBudget();
 });
 
 /* ---------- routing ---------- */
