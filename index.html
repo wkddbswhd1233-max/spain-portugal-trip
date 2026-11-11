@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>스페인·포르투갈 13일 플래너</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700;800&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: 상단 루트 헤더 + 탭 4개(일정 / 도시 / 이동·지도 / 예산·체크리스트). 아줄레주 블루를 축으로, 사프란을 보조로. */
+:root{
+  --bg:#F3F5F9;
+  --surface:#FFFFFF;
+  --ink:#16213A;
+  --muted:#5A6580;
+  --line:#DCE2EC;
+  --accent:#1F4E9C;      /* azulejo cobalt */
+  --accent-soft:#E4ECF8;
+  --saffron:#C98A0E;
+  --saffron-soft:#FBF0D9;
+  --good:#1E7A4F;
+  --warn:#A8560B;
+  --font-display:"Nanum Myeongjo", "AppleMyungjo", "Batang", serif;
+  --font-body:"IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --c-bcn:#B8452E; --c-mad:#7A3E9D; --c-grx:#1E7A4F; --c-svq:#C98A0E; --c-opo:#1F4E9C; --c-tol:#6B7280;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1524; --surface:#172036; --ink:#E7ECF6; --muted:#9AA6C0; --line:#2A3654;
+    --accent:#7FA6E8; --accent-soft:#1E2C4C; --saffron:#E7B44A; --saffron-soft:#3A2F17;
+    --good:#5FC897; --warn:#F0A35A;
+    --c-bcn:#E2775F; --c-mad:#B184D0; --c-grx:#5FC897; --c-svq:#E7B44A; --c-opo:#7FA6E8; --c-tol:#9AA3B2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1524; --surface:#172036; --ink:#E7ECF6; --muted:#9AA6C0; --line:#2A3654;
+  --accent:#7FA6E8; --accent-soft:#1E2C4C; --saffron:#E7B44A; --saffron-soft:#3A2F17;
+  --good:#5FC897; --warn:#F0A35A;
+  --c-bcn:#E2775F; --c-mad:#B184D0; --c-grx:#5FC897; --c-svq:#E7B44A; --c-opo:#7FA6E8; --c-tol:#9AA3B2;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.6}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0;line-height:1.3}
+a{color:var(--accent)}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.num{font-variant-numeric:tabular-nums}
+
+/* header */
+.tiles{height:14px;background-color:var(--accent);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14'%3E%3Cpath d='M0 7 L7 0 L14 7 L7 14Z M14 7 L21 0 L28 7 L21 14Z' fill='%23ffffff' fill-opacity='.22'/%3E%3Ccircle cx='7' cy='7' r='2' fill='%23ffffff' fill-opacity='.5'/%3E%3Ccircle cx='21' cy='7' r='2' fill='%23ffffff' fill-opacity='.5'/%3E%3C/svg%3E")}
+header{padding:28px 0 18px;border-bottom:1px solid var(--line);background:var(--surface)}
+.head-grid{display:flex;flex-wrap:wrap;gap:18px 32px;align-items:flex-end;justify-content:space-between}
+.eyebrow{font-size:13px;color:var(--muted);letter-spacing:.02em}
+h1{font-size:clamp(26px,4vw,36px);font-weight:800;margin-top:4px}
+.route{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:12px}
+.route .stop{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--bg);border:1px solid var(--line);font-size:13px;font-weight:500}
+.route .dot{width:8px;height:8px;border-radius:50%}
+.route .arrow{color:var(--muted);font-size:12px}
+.dates{display:flex;flex-direction:column;gap:6px;min-width:230px}
+.dates label{font-size:13px;color:var(--muted)}
+.dates input{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.dday{font-size:13px;color:var(--muted)}
+.dday b{color:var(--accent)}
+
+/* tabs */
+nav.tabs{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+nav.tabs .wrap{display:flex;gap:4px;overflow-x:auto}
+nav.tabs a{padding:12px 14px;text-decoration:none;color:var(--muted);font-weight:500;white-space:nowrap;border-bottom:2px solid transparent}
+nav.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+nav.tabs a:hover{color:var(--ink)}
+main{padding:24px 0 60px}
+section.view{display:none}
+section.view.on{display:block}
+.section-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:16px}
+.section-head h2{font-size:24px}
+.hint{font-size:13px;color:var(--muted)}
+
+/* summary strip */
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:22px}
+.sum{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;border-top:3px solid var(--c)}
+.sum .n{font-family:var(--font-display);font-size:20px;font-weight:800}
+.sum .s{font-size:13px;color:var(--muted)}
+
+/* itinerary */
+.days{display:flex;flex-direction:column;gap:10px}
+.day{display:grid;grid-template-columns:92px 1fr;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.day .when{padding:14px 12px;border-right:1px solid var(--line);border-left:4px solid var(--c);display:flex;flex-direction:column;gap:2px}
+.day .dn{font-family:var(--font-display);font-size:22px;font-weight:800;line-height:1}
+.day .dt{font-size:12px;color:var(--muted)}
+.day .body{padding:12px 16px}
+.day .top{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.day h3{font-size:17px}
+.chip{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--bg);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.chip.move{background:var(--saffron-soft);border-color:transparent;color:var(--warn)}
+.chip.book{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+.day ul{margin:8px 0 0;padding-left:18px}
+.day li{margin:2px 0}
+.day .stay{margin-top:8px;font-size:13px;color:var(--muted)}
+
+/* cities */
+.city-pick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.city-pick button{border:1px solid var(--line);background:var(--surface);padding:7px 14px;border-radius:999px;cursor:pointer;font-weight:500}
+.city-pick button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.city{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;border-top:4px solid var(--c)}
+.city .intro{color:var(--muted);max-width:65ch;margin:6px 0 16px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.cols h4{margin:0 0 8px;font-size:14px;color:var(--muted);font-weight:600}
+.item{padding:10px 0;border-top:1px solid var(--line)}
+.item b{display:block}
+.item span{font-size:14px;color:var(--muted)}
+.item .price{font-size:12px;color:var(--accent);font-weight:600}
+.note{margin-top:16px;padding:10px 12px;border-radius:8px;background:var(--saffron-soft);font-size:14px}
+
+/* map & transport */
+.map-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;overflow-x:auto}
+.map-card svg{display:block;width:100%;max-width:820px;margin:0 auto;min-width:520px;height:auto}
+.legs{margin-top:20px;display:flex;flex-direction:column;gap:8px}
+.leg{display:grid;grid-template-columns:minmax(160px,220px) 1fr auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+.leg .fromto{font-weight:600}
+.leg .how{font-size:14px;color:var(--muted)}
+.leg .dur{font-family:var(--font-display);font-weight:800;white-space:nowrap}
+
+/* budget */
+.two{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:20px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.panel h3{font-size:18px;margin-bottom:10px}
+table{width:100%;border-collapse:collapse}
+td,th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:12px;color:var(--muted);font-weight:500}
+td input{width:100%;border:1px solid transparent;background:transparent;padding:5px 6px;border-radius:6px}
+td input:hover,td input:focus{border-color:var(--line);background:var(--bg)}
+td.amt input{text-align:right;font-variant-numeric:tabular-nums}
+td.x{width:32px}
+.del{border:none;background:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1}
+.del:hover{color:var(--warn)}
+.btn{border:1px solid var(--line);background:var(--bg);padding:7px 12px;border-radius:8px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.totals{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;margin-top:14px}
+.big{font-family:var(--font-display);font-size:26px;font-weight:800}
+.rate{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.rate input{width:90px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);text-align:right}
+.bar{display:flex;height:10px;border-radius:6px;overflow:hidden;margin-top:12px;background:var(--bg)}
+.bar i{display:block;height:100%}
+
+.progress{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:14px}
+.progress .track{flex:1;height:8px;background:var(--bg);border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.progress .fill{height:100%;background:var(--good);width:0}
+.group{margin-top:12px}
+.group h4{margin:0 0 4px;font-size:13px;color:var(--muted);font-weight:600}
+.check{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.check input{margin-top:5px;accent-color:var(--good);width:16px;height:16px;flex:none}
+.check .t{font-size:14px}
+.check .t small{display:block;color:var(--muted);font-size:12px}
+.check.done .t{color:var(--muted);text-decoration:line-through}
+.check.urgent .t::before{content:"먼저";font-size:11px;font-weight:600;color:var(--warn);background:var(--saffron-soft);padding:1px 6px;border-radius:4px;margin-right:6px}
+.check.done.urgent .t::before{content:none}
+
+footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);font-size:12px}
+
+@media (max-width:720px){
+  .two{grid-template-columns:1fr}
+  .day{grid-template-columns:72px 1fr}
+  .leg{grid-template-columns:1fr;gap:4px}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="tiles" aria-hidden="true"></div>
+<header>
+  <div class="wrap head-grid">
+    <div>
+      <div class="eyebrow">나의 이베리아 여행 · 12박 13일</div>
+      <h1>스페인·포르투갈 여행 플래너</h1>
+      <div class="route" id="route"></div>
+    </div>
+    <div class="dates">
+      <label for="start">출발일 (입력하면 날짜가 채워져요)</label>
+      <input type="date" id="start">
+      <div class="dday" id="dday">출발일을 정하면 D-day를 보여드려요.</div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="섹션">
+  <div class="wrap">
+    <a href="#plan" data-view="plan">일자별 일정</a>
+    <a href="#cities" data-view="cities">도시별 명소·맛집</a>
+    <a href="#transport" data-view="transport">지도·교통</a>
+    <a href="#budget" data-view="budget">예산·체크리스트</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <!-- 일정 -->
+  <section class="view" id="v-plan">
+    <div class="section-head">
+      <h2>일자별 일정</h2>
+      <span class="hint">이동일은 노란 칩, 사전 예약이 필요한 날은 파란 칩으로 표시했어요.</span>
+    </div>
+    <div class="summary" id="summary"></div>
+    <div class="days" id="days"></div>
+  </section>
+
+  <!-- 도시 -->
+  <section class="view" id="v-cities">
+    <div class="section-head">
+      <h2>도시별 명소·맛집</h2>
+      <span class="hint">입장료는 2026년 기준 성인 1인, 공식 판매가예요. 방문 전 공식 사이트에서 다시 확인하세요.</span>
+    </div>
+    <div class="city-pick" id="cityPick" role="group" aria-label="도시 선택"></div>
+    <div id="cityBox"></div>
+  </section>
+
+  <!-- 교통 -->
+  <section class="view" id="v-transport">
+    <div class="section-head">
+      <h2>지도·교통</h2>
+      <span class="hint">지도는 위치 관계를 보여주는 개략도예요.</span>
+    </div>
+    <div class="map-card"><svg id="map" viewBox="0 0 760 600" role="img" aria-label="이베리아반도 여행 경로 지도"></svg></div>
+    <div class="legs" id="legs"></div>
+  </section>
+
+  <!-- 예산 -->
+  <section class="view" id="v-budget">
+    <div class="section-head">
+      <h2>예산·체크리스트</h2>
+      <span class="hint">입력한 내용은 이 브라우저에만 저장돼요.</span>
+    </div>
+    <div class="two">
+      <div class="panel">
+        <h3>1인 예산 (유로)</h3>
+        <table>
+          <thead><tr><th>항목</th><th style="text-align:right">금액 €</th><th></th></tr></thead>
+          <tbody id="budgetRows"></tbody>
+        </table>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn" id="addRow" type="button">+ 항목 추가</button>
+          <button class="btn" id="resetBudget" type="button">예시값으로 되돌리기</button>
+        </div>
+        <div class="bar" id="bar" aria-hidden="true"></div>
+        <div class="totals">
+          <div>
+            <div class="hint">합계</div>
+            <div class="big num" id="totalEur">€0</div>
+            <div class="num" id="totalKrw" style="color:var(--muted)">약 0원</div>
+          </div>
+          <label class="rate" for="rate">1유로 =
+            <input id="rate" type="number" min="1" step="1" value="1520" class="num"> 원
+          </label>
+        </div>
+        <p class="hint" style="margin:10px 0 0">환율 기본값은 2026년 11월 초 매매기준율(약 1,520원)이에요. 환전할 때 실제 환율로 바꿔 넣으세요. 숙소는 2인 1실을 나눈 1인분 기준의 예시값이에요.</p>
+      </div>
+      <div class="panel">
+        <h3>출발 전 체크리스트</h3>
+        <div class="progress"><div class="track"><div class="fill" id="fill"></div></div><span class="num" id="pct">0/0</span></div>
+        <div id="checks"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">입장료·세금·운항 정보는 2026년 11월에 확인한 내용이에요. 알함브라·사그라다 파밀리아는 공식 사이트, 열차는 Renfe·iryo·Ouigo, 항공은 각 항공사 사이트에서 최종 확인하세요.</div>
+</footer>
+
+<script>
+const CITIES = {
+  bcn:{name:"바르셀로나", country:"스페인", nights:3, color:"--c-bcn", lon:2.17, lat:41.39},
+  mad:{name:"마드리드", country:"스페인", nights:3, color:"--c-mad", lon:-3.70, lat:40.42},
+  grx:{name:"그라나다", country:"스페인", nights:2, color:"--c-grx", lon:-3.60, lat:37.18},
+  svq:{name:"세비야", country:"스페인", nights:2, color:"--c-svq", lon:-5.98, lat:37.39},
+  opo:{name:"포르투", country:"포르투갈", nights:2, color:"--c-opo", lon:-8.61, lat:41.15}
+};
+const ORDER = ["bcn","mad","grx","svq","opo"];
+
+const DAYS = [
+  {c:"bcn", t:"인천 → 바르셀로나 도착", move:"인천 → 바르셀로나 (보통 1회 경유)", items:["공항에서 Aerobús 또는 R2 Nord 열차로 시내 이동","숙소 체크인 후 고딕 지구·바르셀로나 대성당 가볍게 산책","첫 저녁은 타파스로 가볍게, 시차 적응 우선"]},
+  {c:"bcn", t:"가우디 데이", book:"사그라다 파밀리아", items:["오전: 사그라다 파밀리아 (시간 지정 입장, 이른 시간이 한산)","산 파우 병원 외관 산책 (사그라다에서 도보 약 10분)","오후: 그라시아 거리, 카사 바트요·카사 밀라","저녁: 엘 보른 지구 바·레스토랑"]},
+  {c:"bcn", t:"공원과 바다", book:"구엘 공원", items:["오전: 구엘 공원 (기념 구역은 시간 지정 예약)","점심: 라 보케리아 시장","오후: 바르셀로네타 해변 산책, 해산물 빠에야","일몰: 벙커 델 카르멜 또는 몬주익 언덕"]},
+  {c:"mad", t:"바르셀로나 → 마드리드", move:"고속열차 약 2시간 30분~3시간", items:["Sants역 출발 고속열차 (AVE·iryo·Ouigo 중 저렴한 것)","오후: 솔 광장 → 마요르 광장 → 산 미겔 시장","저녁: 산 히네스에서 추로스 콘 초콜라테"]},
+  {c:"mad", t:"미술관과 왕궁", book:"프라도 미술관", items:["오전: 프라도 미술관 (벨라스케스 '시녀들', 고야)","레티로 공원, 크리스털 궁전","오후: 레이나 소피아 미술관 (피카소 '게르니카') 또는 왕궁","일몰: 데보드 신전"]},
+  {c:"mad", t:"톨레도 당일치기", move:"Avant 열차 약 33분 (왕복)", items:["아토차역 → 톨레도, 역에서 구시가지까지 버스나 도보","톨레도 대성당, 산토 토메 성당 (엘 그레코)","미라도르 델 바예에서 도시 전경","저녁 마드리드 복귀"]},
+  {c:"grx", t:"마드리드 → 그라나다", move:"고속열차 약 3시간 20분", items:["오전 열차로 이동, 점심 무렵 도착","오후: 알바이신 골목 산책, 칼데레리아 거리 찻집","일몰: 산 니콜라스 전망대에서 알함브라 바라보기","저녁: 음료 주문 시 나오는 무료 타파스 투어"]},
+  {c:"grx", t:"알함브라", book:"알함브라 나스르 궁전", items:["오전: 알함브라 (나스르 궁전은 지정 30분 안에 입장, 여권 지참)","헤네랄리페 정원, 알카사바, 카를로스 5세 궁전","오후: 그라나다 대성당·왕실 예배당","밤: 사크로몬테 동굴 플라멩코"]},
+  {c:"svq", t:"그라나다 → 세비야", move:"버스(ALSA)·기차 약 2시간 30분~3시간", items:["오전 이동, 숙소 체크인","오후: 세비야 대성당과 히랄다 탑","산타 크루스 지구 골목 산책","저녁: 엘 린콘시요 등 노포 타파스 바"]},
+  {c:"svq", t:"세비야 하이라이트", book:"알카사르", items:["오전: 레알 알카사르 (시간 지정 예약)","스페인 광장, 마리아 루이사 공원","해 질 녘: 메트로폴 파라솔 전망대","밤: 플라멩코 공연 (타블라오 또는 박물관 공연)"]},
+  {c:"opo", t:"세비야 → 포르투", move:"라이언에어 직항 약 1시간 15분 · 시계 1시간 뒤로", items:["직항은 운항 요일이 정해져 있어요. 없는 날은 리스본 경유 버스·기차","공항에서 메트로 E선으로 시내 이동","오후: 상 벤투역 아줄레주, 포르투 대성당","일몰: 동 루이스 1세 다리 위층, 모루 정원"]},
+  {c:"opo", t:"포르투 즐기기", book:"렐루 서점", items:["오전: 렐루 서점 (입장권 필요, 오픈 직후 추천), 클레리구스 탑","점심: 프란세지냐","오후: 도루강 6개 다리 크루즈 → 빌라 노바 드 가이아 와이너리 시음","저녁: 히베이라 강변 저녁 식사"]},
+  {c:"opo", t:"포르투 → 인천", move:"포르투 → 인천 (경유)", items:["오전: 볼량 시장에서 기념품, 마제스틱 카페","공항은 출발 3시간 전 도착 목표","EES 출국 심사 대기 시간 고려"]}
+];
+
+const CITY_INFO = {
+  bcn:{intro:"가우디 건축과 지중해가 함께 있는 도시. 2026년은 가우디 서거 100주년이라 주요 명소 예약이 평소보다 빨리 마감돼요.",
+    sights:[
+      ["사그라다 파밀리아","온라인 판매만 하고 현장 매표소가 없어요. 탑 포함 여부는 예약 때 정해요.","기본 €26 · 탑 포함 €36"],
+      ["구엘 공원","기념 구역은 시간 지정 입장이에요.","약 €10~"],
+      ["카사 바트요 · 카사 밀라","그라시아 거리에 나란히 있어요. 둘 중 하나만 내부 관람해도 충분해요.","€35 안팎~"],
+      ["고딕 지구 · 엘 보른","대성당, 피카소 미술관, 좁은 골목 산책.",""],
+      ["벙커 델 카르멜","시내 전경이 가장 넓게 보이는 일몰 명소. 무료.",""]
+    ],
+    food:[
+      ["라 보케리아 시장","람블라스 거리의 시장. 생과일주스, 하몽, 해산물 타파스.",""],
+      ["바르셀로네타 해산물 빠에야","해변 쪽 오래된 식당들이 많아요. 점심에 먹는 게 현지식이에요.",""],
+      ["판 콘 토마테 · 크레마 카탈라나","카탈루냐식 토마토 빵과 디저트.",""],
+      ["베르무트","주말 점심 전 한 잔 마시는 현지 문화.",""]
+    ],
+    tip:"람블라스 거리·메트로에서 소매치기가 많아요. 휴대폰은 앞주머니나 스트랩에. 관광세가 1인 1박 최대 €12까지 올라 숙소 결제 시 별도로 붙어요."},
+  mad:{intro:"스페인의 수도이자 미술관 도시. 프라도, 레이나 소피아, 티센 미술관이 한 거리에 모여 있어요.",
+    sights:[
+      ["프라도 미술관","벨라스케스, 고야, 엘 그레코. 폐관 전 2시간은 무료 입장이지만 줄이 길어요.","약 €15"],
+      ["레이나 소피아 미술관","피카소 '게르니카'.","약 €12"],
+      ["마드리드 왕궁","내부 관람 약 1시간 30분.","약 €14"],
+      ["레티로 공원","호수 보트, 크리스털 궁전. 무료.",""],
+      ["톨레도 (당일치기)","세 문화가 섞인 중세 도시. 마드리드에서 열차 약 33분.",""]
+    ],
+    food:[
+      ["산 히네스 (Chocolatería San Ginés)","1894년부터 영업한 추로스 콘 초콜라테 가게.",""],
+      ["보티노 (Sobrino de Botín)","세계에서 가장 오래된 레스토랑으로 알려진 곳. 새끼돼지 통구이. 예약 권장.",""],
+      ["산 미겔 시장","여러 타파스를 조금씩 맛보기 좋아요.",""],
+      ["보카디요 데 칼라마레스","마요르 광장 주변의 오징어튀김 샌드위치.",""]
+    ],
+    tip:"저녁 식사는 보통 밤 9시 이후에 시작해요. 레스토랑 오픈 시간을 확인하세요."},
+  grx:{intro:"알함브라와 이슬람 시대의 흔적이 남은 도시. 바에서 음료를 시키면 타파스가 무료로 따라 나와요.",
+    sights:[
+      ["알함브라","일반 입장권은 나스르 궁전·헤네랄리페·알카사바 포함. 나스르 궁전은 지정 30분 안에 입장해야 해요. 이름이 적힌 표라 여권을 꼭 지참하세요.","일반 €22.27 (수수료 포함)"],
+      ["알바이신","하얀 집들이 이어진 옛 무어인 지구. 언덕이 가팔라 편한 신발 필수.",""],
+      ["산 니콜라스 전망대","알함브라와 시에라 네바다를 함께 보는 일몰 명소.",""],
+      ["사크로몬테","동굴 집에서 보는 플라멩코 공연.","약 €30~"],
+      ["왕실 예배당","이사벨 여왕과 페르난도 왕의 묘소.",""]
+    ],
+    food:[
+      ["무료 타파스 바 투어","음료 한 잔에 타파스 한 접시. 2~3곳을 옮겨 다니는 게 현지식이에요.",""],
+      ["보데가스 카스타녜다","오래된 타파스 바.",""],
+      ["칼데레리아 거리 찻집","모로코식 민트차와 디저트.",""]
+    ],
+    tip:"2026년 8월 지진 후 알카사바가 한동안 닫혔다가 9월 말에 다시 열렸어요. 방문 전 공식 사이트에서 운영 구역을 확인하세요. 공식 표가 매진이면 가이드 투어 상품에 별도 배정분이 남아 있는 경우가 많아요."},
+  svq:{intro:"안달루시아의 중심이자 플라멩코의 본고장. 여름엔 40도를 넘기도 하니 한낮 일정은 실내 위주로.",
+    sights:[
+      ["세비야 대성당 · 히랄다 탑","세계 최대급 고딕 성당. 콜럼버스의 묘가 있어요.","약 €13~"],
+      ["레알 알카사르","무데하르 양식 궁전과 정원. 시간 지정 예약 권장.","약 €15~"],
+      ["스페인 광장","타일로 장식된 반원형 광장. 무료.",""],
+      ["메트로폴 파라솔","나무 구조물 위 전망대. 해 질 녘 추천.","약 €15"],
+      ["플라멩코 공연","타블라오나 플라멩코 박물관 공연.","약 €25~"]
+    ],
+    food:[
+      ["엘 린콘시요","1670년부터 이어온 세비야에서 가장 오래된 바.",""],
+      ["살모레호 · 에스피나카스 콘 가르반소스","차가운 토마토 수프, 시금치 병아리콩 스튜.",""],
+      ["보데가 산타 크루스","서서 먹는 저렴한 타파스 바.",""]
+    ],
+    tip:"포르투로 가는 날은 시차가 생겨요. 포르투갈이 스페인보다 1시간 느려요."},
+  opo:{intro:"도루강을 따라 붉은 지붕이 겹겹이 있는 항구 도시. 포트와인의 고향이에요.",
+    sights:[
+      ["상 벤투역","역사 내부를 덮은 아줄레주 타일 벽화. 무료.",""],
+      ["렐루 서점","입장권은 책을 사면 차감돼요. 오픈 직후가 덜 붐벼요.","약 €10"],
+      ["동 루이스 1세 다리","위층은 걸어서, 아래층은 강변 산책로와 연결돼요.",""],
+      ["빌라 노바 드 가이아","강 건너 포트와인 셀러 투어와 시음.","약 €15~30"],
+      ["도루강 6개 다리 크루즈","약 50분 유람선.","약 €15~"]
+    ],
+    food:[
+      ["프란세지냐","고기와 치즈를 겹친 샌드위치에 소스를 부은 포르투 명물.",""],
+      ["바칼라우","포르투갈식 대구 요리.",""],
+      ["파스텔 드 나타","에그타르트. 따뜻할 때 시나몬 뿌려서.",""],
+      ["마제스틱 카페","아르누보 양식의 오래된 카페.",""]
+    ],
+    tip:"언덕과 돌길이 많아요. 굽 없는 신발이 좋아요."}
+};
+
+const LEGS = [
+  {from:"인천", to:"바르셀로나", how:"직항은 시즌별 운항 여부 확인, 보통 1회 경유. 인(IN) 바르셀로나 · 아웃(OUT) 포르투 다구간으로 검색", dur:"15~20시간"},
+  {from:"바르셀로나", to:"마드리드", how:"고속열차 AVE·iryo·Ouigo. 바르셀로나 Sants → 마드리드 Atocha 또는 Chamartín", dur:"2시간 30분~3시간"},
+  {from:"마드리드", to:"톨레도 (왕복)", how:"Avant 열차, 아토차역 출발", dur:"약 33분"},
+  {from:"마드리드", to:"그라나다", how:"고속열차, 아토차역 출발", dur:"약 3시간 20분"},
+  {from:"그라나다", to:"세비야", how:"ALSA 버스 또는 Renfe 열차", dur:"2시간 30분~3시간"},
+  {from:"세비야", to:"포르투", how:"라이언에어 직항 (운항 요일 제한, 위탁수하물 별도 요금). 대안은 리스본 경유 버스·기차", dur:"비행 약 1시간 15분"},
+  {from:"포르투", to:"인천", how:"유럽 허브 1회 경유", dur:"17~22시간"}
+];
+
+const DEFAULT_BUDGET = [
+  ["국제선 항공 (다구간, 예시)", 1000],
+  ["숙소 12박 (2인 1실 1인분)", 840],
+  ["바르셀로나 관광세 3박 (4성 기준)", 25],
+  ["도시 간 이동 (열차·버스·항공)", 220],
+  ["입장료 (사그라다·알함브라·프라도 등)", 160],
+  ["식비 (13일 × €50)", 650],
+  ["시내 교통", 60],
+  ["플라멩코·투어·와이너리", 90],
+  ["유심·eSIM, 여행자보험", 60],
+  ["예비비", 150]
+];
+
+const CHECKS = [
+  {g:"서류·입국", items:[
+    ["여권 유효기간 6개월 이상 남았는지", "", true],
+    ["ETIAS 시행 여부 확인", "2026년 11월 현재 시행 전이에요. 출발 전 EU 공식 사이트만 확인하고, 대행 사이트 결제는 하지 마세요.", false],
+    ["EES 첫 입국 시 지문·얼굴 등록", "입국 심사가 이전보다 오래 걸릴 수 있어요.", false],
+    ["여행자보험 가입", "", false]
+  ]},
+  {g:"예약 (일찍 마감)", items:[
+    ["알함브라 일반 입장권 (나스르 궁전 시간 지정)", "수 주 전 공식 사이트 예약. 입장권 이름과 여권이 일치해야 해요.", true],
+    ["사그라다 파밀리아 입장권", "온라인만 판매. 2026년은 가우디 100주년이라 일찍 마감돼요.", true],
+    ["구엘 공원 · 알카사르 · 렐루 서점", "", false],
+    ["바르셀로나→마드리드, 마드리드→그라나다 열차", "일찍 살수록 저렴해요.", false],
+    ["세비야→포르투 항공 (운항 요일 확인)", "", true],
+    ["숙소 5곳", "", true],
+    ["플라멩코 공연 (그라나다 또는 세비야)", "", false]
+  ]},
+  {g:"준비물", items:[
+    ["트래블카드·신용카드 2장 이상", "", false],
+    ["유심·eSIM (스페인·포르투갈 공통 EU 로밍)", "", false],
+    ["편한 운동화", "알바이신·포르투는 언덕과 돌길이에요.", false],
+    ["소매치기 방지 스트랩·크로스백", "", false],
+    ["어댑터는 필요 없음 (220V, C·F 타입)", "", false]
+  ]}
+];
+
+/* ---------- storage helpers ---------- */
+function load(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+
+/* ---------- header route ---------- */
+document.getElementById("route").innerHTML = ORDER.map((k,i)=>{
+  const c = CITIES[k];
+  return `${i? '<span class="arrow">→</span>':''}<span class="stop"><span class="dot" style="background:var(${c.color})"></span>${c.name} <span class="num" style="color:var(--muted)">${c.nights}박</span></span>`;
+}).join("");
+
+/* ---------- dates ---------- */
+const startEl = document.getElementById("start");
+startEl.value = load("ib-start", "");
+const WD = ["일","월","화","수","목","금","토"];
+function dayDate(i){
+  if(!startEl.value) return "";
+  const d = new Date(startEl.value + "T00:00:00");
+  d.setDate(d.getDate()+i);
+  return `${d.getMonth()+1}/${d.getDate()} (${WD[d.getDay()]})`;
+}
+function renderDday(){
+  const el = document.getElementById("dday");
+  if(!startEl.value){ el.textContent = "출발일을 정하면 D-day를 보여드려요."; return; }
+  const today = new Date(); today.setHours(0,0,0,0);
+  const s = new Date(startEl.value + "T00:00:00");
+  const end = new Date(s); end.setDate(end.getDate()+12);
+  const diff = Math.round((s - today)/86400000);
+  const range = `${s.getMonth()+1}/${s.getDate()} – ${end.getMonth()+1}/${end.getDate()}`;
+  el.innerHTML = diff > 0 ? `<b>D-${diff}</b> · ${range}` : diff === 0 ? `<b>오늘 출발!</b> · ${range}` : `${range} 여행`;
+}
+startEl.addEventListener("change", ()=>{ save("ib-start", startEl.value); renderDays(); renderDday(); });
+
+/* ---------- itinerary ---------- */
+function renderSummary(){
+  document.getElementById("summary").innerHTML = ORDER.map(k=>{
+    const c = CITIES[k];
+    return `<div class="sum" style="--c:var(${c.color})"><div class="n">${c.name}</div><div class="s">${c.country} · ${c.nights}박</div></div>`;
+  }).join("");
+}
+function renderDays(){
+  document.getElementById("days").innerHTML = DAYS.map((d,i)=>{
+    const c = CITIES[d.c];
+    const isLast = i === DAYS.length-1;
+    const stay = isLast ? "기내 1박 후 귀국" : `숙박: ${c.name}`;
+    return `<article class="day" style="--c:var(${c.color})">
+      <div class="when"><span class="dt">DAY</span><span class="dn num">${i+1}</span><span class="dt num">${dayDate(i)}</span></div>
+      <div class="body">
+        <div class="top"><h3>${esc(d.t)}</h3>
+          ${d.move? `<span class="chip move">이동 · ${esc(d.move)}</span>`:""}
+          ${d.book? `<span class="chip book">예약 · ${esc(d.book)}</span>`:""}
+        </div>
+        <ul>${d.items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+        <div class="stay">${stay}</div>
+      </div></article>`;
+  }).join("");
+}
+
+/* ---------- cities ---------- */
+let curCity = "bcn";
+function renderCityPick(){
+  document.getElementById("cityPick").innerHTML = ORDER.map(k=>
+    `<button type="button" data-c="${k}" aria-pressed="${k===curCity}">${CITIES[k].name}</button>`).join("");
+}
+function renderCity(){
+  const c = CITIES[curCity], info = CITY_INFO[curCity];
+  const list = arr => arr.map(([n,d,p])=>`<div class="item"><b>${esc(n)}</b><span>${esc(d)}</span>${p? `<div class="price num">${esc(p)}</div>`:""}</div>`).join("");
+  document.getElementById("cityBox").innerHTML = `<div class="city" style="--c:var(${c.color})">
+    <h3 style="font-size:22px">${c.name} <span class="hint" style="font-family:var(--font-body)">${c.country} · ${c.nights}박</span></h3>
+    <p class="intro">${esc(info.intro)}</p>
+    <div class="cols"><div><h4>명소</h4>${list(info.sights)}</div><div><h4>먹을 것</h4>${list(info.food)}</div></div>
+    <div class="note"><b>팁</b> · ${esc(info.tip)}</div></div>`;
+}
+document.getElementById("cityPick").addEventListener("click", e=>{
+  const b = e.target.closest("button[data-c]"); if(!b) return;
+  curCity = b.dataset.c; renderCityPick(); renderCity();
+});
+
+/* ---------- map ---------- */
+function proj(lon,lat){ return [ (lon+10)*55, (44.2-lat)*70 ]; }
+const IBERIA = [[-9.3,43.0],[-8.0,43.7],[-5.8,43.6],[-3.8,43.45],[-1.8,43.4],[-1.5,43.3],[0.7,42.8],[3.2,42.4],[3.2,41.9],[2.2,41.4],[0.9,41.0],[0.2,40.2],[-0.3,39.5],[0.2,38.8],[-0.5,38.3],[-0.7,37.6],[-1.6,37.3],[-2.2,36.7],[-4.4,36.7],[-5.3,36.1],[-6.0,36.2],[-6.4,36.8],[-7.0,37.2],[-7.4,37.2],[-8.9,37.0],[-8.8,38.0],[-9.2,38.7],[-9.5,38.8],[-9.0,39.6],[-8.7,40.6],[-8.7,41.2],[-8.9,41.9],[-8.8,42.5]];
+const BORDER = [[-8.9,41.9],[-8.2,42.1],[-6.6,41.95],[-6.2,41.6],[-6.9,41.0],[-6.8,40.3],[-7.0,39.6],[-7.5,39.6],[-7.0,38.9],[-7.3,38.2],[-7.0,37.9],[-7.4,37.2]];
+function renderMap(){
+  const ink = cssVar("--ink"), muted = cssVar("--muted"), line = cssVar("--line"), surface = cssVar("--surface"), bg = cssVar("--bg"), accent=cssVar("--accent");
+  const pts = a => a.map(p=>proj(...p).map(v=>v.toFixed(1)).join(",")).join(" ");
+  const route = ORDER.map(k=>proj(CITIES[k].lon, CITIES[k].lat));
+  const tol = proj(-4.02,39.86), mad = proj(CITIES.mad.lon, CITIES.mad.lat), lis = proj(-9.14,38.72);
+  const legLbl = [["고속열차 2.5~3h",0],["고속열차 3h20",1],["버스·열차 2.5~3h",2],["항공 1h15",3]];
+  let s = `<rect width="760" height="600" fill="${bg}"/>
+    <polygon points="${pts(IBERIA)}" fill="${surface}" stroke="${line}" stroke-width="1.5" stroke-linejoin="round"/>
+    <polyline points="${pts(BORDER)}" fill="none" stroke="${muted}" stroke-width="1" stroke-dasharray="4 4"/>
+    <text x="${proj(-8.6,39.6)[0]}" y="${proj(-8.6,39.6)[1]}" fill="${muted}" font-size="15" font-family="var(--font-display)" font-weight="700" text-anchor="middle">PORTUGAL</text>
+    <text x="${proj(-4.2,41.6)[0]}" y="${proj(-4.2,41.6)[1]}" fill="${muted}" font-size="18" font-family="var(--font-display)" font-weight="700" text-anchor="middle" letter-spacing="4">ESPAÑA</text>
+    <text x="${proj(1.2,38.6)[0]}" y="${proj(1.2,38.6)[1]}" fill="${muted}" font-size="12" font-style="italic" text-anchor="middle">지중해</text>
+    <text x="10" y="${proj(-9.6,40.1)[1]}" fill="${muted}" font-size="12" font-style="italic" text-anchor="start">대서양</text>
+    <line x1="${mad[0]}" y1="${mad[1]}" x2="${tol[0]}" y2="${tol[1]}" stroke="var(--c-tol)" stroke-width="2" stroke-dasharray="3 3"/>`;
+  for(let i=0;i<route.length-1;i++){
+    const [x1,y1]=route[i],[x2,y2]=route[i+1];
+    const dash = i===3 ? 'stroke-dasharray="7 5"' : "";
+    s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${accent}" stroke-width="3" stroke-linecap="round" ${dash}/>`;
+  }
+  legLbl.forEach(([t,i])=>{
+    const [x1,y1]=route[i],[x2,y2]=route[i+1];
+    const mx=(x1+x2)/2, my=(y1+y2)/2;
+    const off = i===0? [0,-12] : i===1? [14,4] : i===2? [0,22] : [-10,-10];
+    const anchor = i===1? "start" : i===3? "end" : "middle";
+    s += `<text x="${mx+off[0]}" y="${my+off[1]}" fill="${ink}" font-size="12" text-anchor="${anchor}" paint-order="stroke" stroke="${surface}" stroke-width="4">${t}</text>`;
+  });
+  s += `<circle cx="${lis[0]}" cy="${lis[1]}" r="4" fill="${muted}"/><text x="${lis[0]+8}" y="${lis[1]+4}" fill="${muted}" font-size="12">리스본 (경유 대안)</text>`;
+  s += `<circle cx="${tol[0]}" cy="${tol[1]}" r="5" fill="var(--c-tol)"/><text x="${tol[0]-9}" y="${tol[1]+4}" fill="${muted}" font-size="12" text-anchor="end">톨레도 당일</text>`;
+  const lab = {bcn:[-10,-14,"end"], mad:[-14,-12,"end"], grx:[12,18,"start"], svq:[-12,20,"end"], opo:[12,-10,"start"]};
+  ORDER.forEach((k,i)=>{
+    const [x,y]=route[i], c=CITIES[k], [dx,dy,an]=lab[k];
+    s += `<circle cx="${x}" cy="${y}" r="11" fill="var(${c.color})" stroke="${surface}" stroke-width="3"/>
+      <text x="${x}" y="${y+4}" fill="#fff" font-size="11" font-weight="700" text-anchor="middle">${i+1}</text>
+      <text x="${x+dx}" y="${y+dy}" fill="${ink}" font-size="15" font-weight="700" text-anchor="${an}" paint-order="stroke" stroke="${surface}" stroke-width="4">${c.name} · ${c.nights}박</text>`;
+  });
+  s += `<text x="20" y="580" fill="${muted}" font-size="11">개략도 · 축척 없음</text>`;
+  document.getElementById("map").innerHTML = s;
+}
+function renderLegs(){
+  document.getElementById("legs").innerHTML = LEGS.map(l=>
+    `<div class="leg"><div class="fromto">${esc(l.from)} → ${esc(l.to)}</div><div class="how">${esc(l.how)}</div><div class="dur num">${esc(l.dur)}</div></div>`).join("");
+}
+
+/* ---------- budget ---------- */
+let budget = load("ib-budget", DEFAULT_BUDGET.map(r=>[...r]));
+const rateEl = document.getElementById("rate");
+rateEl.value = load("ib-rate", 1520);
+const BAR_COLORS = ["--c-opo","--c-bcn","--c-svq","--c-mad","--c-grx","--c-tol"];
+function renderBudget(){
+  document.getElementById("budgetRows").innerHTML = budget.map((r,i)=>
+    `<tr><td><input id="bn${i}" data-i="${i}" data-f="0" value="${esc(r[0])}" aria-label="항목 이름"></td>
+     <td class="amt"><input id="ba${i}" data-i="${i}" data-f="1" type="number" min="0" step="1" value="${r[1]}" aria-label="금액(유로)"></td>
+     <td class="x"><button class="del" type="button" data-del="${i}" aria-label="삭제">×</button></td></tr>`).join("");
+  renderTotals();
+}
+function renderTotals(){
+  const total = budget.reduce((a,r)=>a+(+r[1]||0),0);
+  const rate = +rateEl.value || 0;
+  document.getElementById("totalEur").textContent = "€" + total.toLocaleString("ko-KR");
+  document.getElementById("totalKrw").textContent = "약 " + Math.round(total*rate).toLocaleString("ko-KR") + "원";
+  document.getElementById("bar").innerHTML = total ? budget.map((r,i)=>
+    `<i title="${esc(r[0])} €${r[1]}" style="width:${(+r[1]||0)/total*100}%;background:var(${BAR_COLORS[i%BAR_COLORS.length]})"></i>`).join("") : "";
+}
+document.getElementById("budgetRows").addEventListener("input", e=>{
+  const t = e.target; if(t.dataset.i===undefined) return;
+  budget[+t.dataset.i][+t.dataset.f] = t.dataset.f==="1" ? (+t.value||0) : t.value;
+  save("ib-budget", budget); renderTotals();
+});
+document.getElementById("budgetRows").addEventListener("click", e=>{
+  const b = e.target.closest("[data-del]"); if(!b) return;
+  budget.splice(+b.dataset.del,1); save("ib-budget", budget); renderBudget();
+});
+document.getElementById("addRow").addEventListener("click", ()=>{
+  budget.push(["새 항목",0]); save("ib-budget", budget); renderBudget();
+  const el = document.getElementById("bn"+(budget.length-1)); el && el.focus(); el && el.select();
+});
+document.getElementById("resetBudget").addEventListener("click", ()=>{
+  budget = DEFAULT_BUDGET.map(r=>[...r]); save("ib-budget", budget); renderBudget();
+});
+rateEl.addEventListener("input", ()=>{ save("ib-rate", +rateEl.value); renderTotals(); });
+
+/* ---------- checklist ---------- */
+let done = load("ib-checks", {});
+function renderChecks(){
+  let n=0, d=0;
+  document.getElementById("checks").innerHTML = CHECKS.map((g,gi)=>
+    `<div class="group"><h4>${g.g}</h4>${g.items.map(([t,sub,urgent],ii)=>{
+      const id=`ck${gi}_${ii}`; n++; const on=!!done[id]; if(on) d++;
+      return `<label class="check${on?" done":""}${urgent?" urgent":""}" for="${id}"><input type="checkbox" id="${id}" ${on?"checked":""}><span class="t">${esc(t)}${sub?`<small>${esc(sub)}</small>`:""}</span></label>`;
+    }).join("")}</div>`).join("");
+  document.getElementById("pct").textContent = `${d}/${n}`;
+  document.getElementById("fill").style.width = (n? d/n*100 : 0) + "%";
+}
+document.getElementById("checks").addEventListener("change", e=>{
+  if(e.target.type!=="checkbox") return;
+  done[e.target.id] = e.target.checked; save("ib-checks", done); renderChecks();
+});
+
+/* ---------- routing ---------- */
+const VIEWS = ["plan","cities","transport","budget"];
+function route(){
+  const h = location.hash.replace("#","");
+  const v = VIEWS.includes(h) ? h : "plan";
+  VIEWS.forEach(x=>document.getElementById("v-"+x).classList.toggle("on", x===v));
+  document.querySelectorAll("nav.tabs a").forEach(a=>{ if(a.dataset.view===v) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
+  if(v==="transport") renderMap();
+}
+window.addEventListener("hashchange", route);
+const mq = window.matchMedia("(prefers-color-scheme: dark)");
+mq.addEventListener && mq.addEventListener("change", renderMap);
+new MutationObserver(renderMap).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+renderSummary(); renderDays(); renderDday(); renderCityPick(); renderCity(); renderLegs(); renderBudget(); renderChecks(); renderMap(); route();
+</script>
+</body>
+</html>
